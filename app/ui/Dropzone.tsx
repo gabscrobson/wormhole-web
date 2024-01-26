@@ -5,20 +5,50 @@ import { useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import UploadButton from './UploadButton'
 import { FilePlus } from '@phosphor-icons/react/dist/ssr/FilePlus'
-import Button from './Button'
+import { Button } from './Button'
+import axios from 'axios'
+import { set } from 'zod'
+
+interface UploadResponse {
+  signedUrl: string
+  fileId: string
+}
 
 export default function Dropzone() {
+  const BACKEND_URL = 'http://localhost:3333'
   const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [fileId, setFileId] = useState<string | null>(null)
 
   const { isDragActive, open, getInputProps, getRootProps } = useDropzone({
     onDrop: handleStartUpload,
     noClick: isUploading,
   })
 
-  function handleStartUpload(files: File[]) {
+  async function handleStartUpload(files: File[]) {
     setFile(files[0])
     setIsUploading(true)
+
+    const res = await axios.post(`${BACKEND_URL}/uploads`, {
+      name: files[0].name,
+      contentType: files[0].type,
+    })
+
+    const data: UploadResponse = res.data
+
+    setFileId(data.fileId)
+
+    await axios.put(data.signedUrl, files[0], {
+      headers: {
+        'Content-Type': files[0].type,
+      },
+      onUploadProgress: (progressEvent) => {
+        const progress =
+          (progressEvent.loaded / (progressEvent?.total ?? 1)) * 100
+        setProgress(progress)
+      },
+    })
   }
 
   function handleCancelUpload() {
@@ -62,10 +92,11 @@ export default function Dropzone() {
                 <p>
                   Uploading <strong>{file?.name}</strong>
                 </p>
+                <p>{progress}</p>
                 <Button
                   onClick={handleCancelUpload}
-                  className="hover:bg-red-500 hover:border-transparent 
-                  border-red-500 text-red-500 py-1"
+                  className="hover:bg-red-500 hover:text-white
+                  text-red-500"
                 >
                   Cancel
                 </Button>
@@ -76,7 +107,12 @@ export default function Dropzone() {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <UploadButton file={file} />
-        <Button onClick={open} disabled={file != null}>
+        <Button
+          onClick={open}
+          disabled={file != null}
+          className="bg-transparent border border-gray-400 text-gray-400 
+          hover:bg-transparent hover:text-white hover:border-white"
+        >
           <FilePlus size={20} />
           Select File
         </Button>

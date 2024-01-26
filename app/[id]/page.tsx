@@ -1,3 +1,4 @@
+import { X } from '@phosphor-icons/react/dist/ssr/X'
 import { fetchFile } from '../lib/data'
 
 interface Params {
@@ -11,11 +12,16 @@ export default async function Page({ params }: Params) {
   console.log(file)
 
   if (!file) {
-    return <div>File not found</div>
+    return (
+      <div className="flex items-center justify-center h-32 font-bold gap-3 rounded-md">
+        <h1>File not found or expired</h1>
+        <X size={32} />
+      </div>
+    )
   }
 
   return (
-    <div>
+    <div className="border">
       <h1>{file.name}</h1>
       <p>{file.createdAt}</p>
     </div>
