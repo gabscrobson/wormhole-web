@@ -5,3 +5,8 @@ export interface FileInfo {
   contentType: string
   createdAt: string
 }
+
+export interface GeneratePresignedUrlResponse {
+  signedUrl: string
+  fileId: string
+}

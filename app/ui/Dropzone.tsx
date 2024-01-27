@@ -1,25 +1,20 @@
 'use client'
 
 import { UploadSimple } from '@phosphor-icons/react/dist/ssr/UploadSimple'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import UploadButton from './UploadButton'
 import { FilePlus } from '@phosphor-icons/react/dist/ssr/FilePlus'
 import { Button } from './Button'
-import axios from 'axios'
-import { set } from 'zod'
-
-interface UploadResponse {
-  signedUrl: string
-  fileId: string
-}
+import axios, { Canceler } from 'axios'
+import { generatePresignedUrl } from '../lib/data'
 
 export default function Dropzone() {
-  const BACKEND_URL = 'http://localhost:3333'
   const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [fileId, setFileId] = useState<string | null>(null)
+
+  const cancelFileUpload = useRef<Canceler | null>(null)
 
   const { isDragActive, open, getInputProps, getRootProps } = useDropzone({
     onDrop: handleStartUpload,
@@ -30,30 +25,40 @@ export default function Dropzone() {
     setFile(files[0])
     setIsUploading(true)
 
-    const res = await axios.post(`${BACKEND_URL}/uploads`, {
-      name: files[0].name,
-      contentType: files[0].type,
-    })
+    const data = await generatePresignedUrl(files[0].name, files[0].type)
 
-    const data: UploadResponse = res.data
-
-    setFileId(data.fileId)
+    // TODO: Handle error ( Toast )
+    if (!data) {
+      return
+    }
 
     await axios.put(data.signedUrl, files[0], {
       headers: {
         'Content-Type': files[0].type,
       },
       onUploadProgress: (progressEvent) => {
-        const progress =
-          (progressEvent.loaded / (progressEvent?.total ?? 1)) * 100
-        setProgress(progress)
+        const { loaded, total = 1 } = progressEvent
+
+        const progress = Math.round((loaded * 100) / total)
+
+        if (progress <= 100) {
+          setProgress(progress)
+        }
       },
+      cancelToken: new axios.CancelToken((cancel) => {
+        cancelFileUpload.current = cancel
+      }),
     })
   }
 
   function handleCancelUpload() {
+    if (cancelFileUpload.current) {
+      cancelFileUpload.current()
+    }
     setFile(null)
     setIsUploading(false)
+    setProgress(0)
+    setFileId(null)
   }
 
   const status = file ? 'accept' : isDragActive ? 'active' : 'pending'
@@ -106,7 +111,6 @@ export default function Dropzone() {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <UploadButton file={file} />
         <Button
           onClick={open}
           disabled={file != null}
