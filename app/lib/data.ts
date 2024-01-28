@@ -1,5 +1,5 @@
 import { unstable_noStore as noStore } from 'next/cache'
-import { FileInfo, GeneratePresignedUrlResponse } from './definitions'
+import { FileInfo, GenerateUploadPresignedUrlResponse } from './definitions'
 import axios from 'axios'
 
 export async function fetchFile(fileId: string): Promise<FileInfo | null> {
@@ -22,10 +22,11 @@ export async function fetchFile(fileId: string): Promise<FileInfo | null> {
   }
 }
 
-export async function generatePresignedUrl(
+export async function generateUploadPresignedUrl(
   fileName: string,
   contentType: string,
-): Promise<GeneratePresignedUrlResponse | null> {
+  size: number,
+): Promise<GenerateUploadPresignedUrlResponse | null> {
   noStore()
 
   try {
@@ -34,10 +35,30 @@ export async function generatePresignedUrl(
       {
         name: fileName,
         contentType,
+        size,
       },
     )
 
-    const data: GeneratePresignedUrlResponse = res.data
+    const data: GenerateUploadPresignedUrlResponse = res.data
+
+    return data
+  } catch (error) {
+    console.error(error)
+    return null
+  }
+}
+
+export async function generateDownloadPresignedUrl(
+  fileId: string,
+): Promise<string | null> {
+  noStore()
+
+  try {
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${fileId}`,
+    )
+
+    const data: string = res.data
 
     return data
   } catch (error) {

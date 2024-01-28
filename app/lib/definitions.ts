@@ -4,9 +4,10 @@ export interface FileInfo {
   key: string
   contentType: string
   createdAt: string
+  size: number
 }
 
-export interface GeneratePresignedUrlResponse {
+export interface GenerateUploadPresignedUrlResponse {
   signedUrl: string
   fileId: string
 }
