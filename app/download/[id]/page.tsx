@@ -1,8 +1,8 @@
 import { X } from '@phosphor-icons/react/dist/ssr/X'
-import { fetchFile } from '../lib/data'
-import { formatBytes } from '../lib/utils'
-import Countdown from '../ui/[id]/Countdown'
-import DownloadButton from '../ui/[id]/DownloadButton'
+import { fetchFile } from '../../lib/data'
+import { formatBytes } from '../../lib/utils'
+import Countdown from '../../ui/download/Countdown'
+import DownloadButton from '../../ui/download/DownloadButton'
 import { Suspense } from 'react'
 
 interface Params {

@@ -25,11 +25,11 @@ const links = [
   },
   {
     title: 'Widget',
-    href: '',
+    href: '/widget',
   },
   {
-    title: 'teste',
-    href: '',
+    title: 'About Wormhole...',
+    href: '/about',
   },
 ]
 

@@ -41,6 +41,7 @@ export default function Home() {
         title: 'Uh oh! Something went wrong.',
         description: 'There was a problem uploading your file.',
       })
+      handleCancelUpload()
       return
     }
 
