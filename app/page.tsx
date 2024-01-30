@@ -167,7 +167,7 @@ export default function Home() {
       <LinkDialog
         open={linkDialogOpen}
         onOpenChange={setLinkDialogOpen}
-        url={`${window.location.origin}/download/${fileId}`}
+        fileId={fileId}
         onContinue={handleCancelUpload}
       />
     </div>

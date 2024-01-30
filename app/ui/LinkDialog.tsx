@@ -8,21 +8,27 @@ import {
   AlertDialogTitle,
 } from './AlertDialog'
 import { useToast } from './Toast/use-toast'
+import { useEffect, useState } from 'react'
 
 interface LinkDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  url: string
+  fileId: string | null
   onContinue: () => void
 }
 
 export default function LinkDialog({
   open,
   onOpenChange,
-  url,
+  fileId,
   onContinue,
 }: LinkDialogProps) {
   const { toast } = useToast()
+  const [url, setUrl] = useState<string>('')
+
+  useEffect(() => {
+    setUrl(`${window.location.origin}/download/${fileId}`)
+  }, [fileId])
 
   function handleCopyToClipboard() {
     navigator.clipboard.writeText(url)
