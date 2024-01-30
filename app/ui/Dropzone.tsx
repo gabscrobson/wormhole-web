@@ -1,6 +1,6 @@
 'use client'
 
-import { UploadSimple } from '@phosphor-icons/react'
+import { ArchiveBox, UploadSimple } from '@phosphor-icons/react'
 import { Button } from './Button'
 import { DropzoneInputProps, DropzoneRootProps } from 'react-dropzone'
 import ProgressBar from './ProgressBar'
@@ -52,7 +52,12 @@ export default function Dropzone({
               <p>Choose a file or drag it here</p>
             </div>
           )}
-          {status === 'active' && 'Drop your files here'}
+          {status === 'active' && (
+            <div className="flex items-center gap-1 flex-col">
+              <ArchiveBox size={35} />
+              <p>Drop your files here</p>
+            </div>
+          )}
           {status === 'accept' && (
             <div className="flex items-center gap-2 flex-col">
               <p>

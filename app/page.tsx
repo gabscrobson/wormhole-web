@@ -9,12 +9,14 @@ import { Button } from './ui/Button'
 import Dropzone from './ui/Dropzone'
 import { Files } from '@phosphor-icons/react'
 import { useToast } from './ui/Toast/use-toast'
+import LinkDialog from './ui/LinkDialog'
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [fileId, setFileId] = useState<string | null>(null)
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false)
 
   const cancelFileUpload = useRef<Canceler | null>(null)
 
@@ -45,6 +47,8 @@ export default function Home() {
       return
     }
 
+    setFileId(data.fileId)
+
     await axios.put(data.signedUrl, files[0], {
       headers: {
         'Content-Type': files[0].type,
@@ -62,6 +66,8 @@ export default function Home() {
         cancelFileUpload.current = cancel
       }),
     })
+
+    setLinkDialogOpen(true)
   }
 
   function handleCancelUpload() {
@@ -75,13 +81,55 @@ export default function Home() {
   }
 
   async function handlePasteFromClipboard() {
+    if (!navigator.clipboard) {
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'Clipboard API not available.',
+      })
+      return
+    }
+
     try {
-      const clipboardItems = await navigator.clipboard.read()
-      const blobOutput = await clipboardItems[0].getType('image/png')
-      const data = URL.createObjectURL(blobOutput)
-      console.log(data)
-    } catch (e) {
-      console.log(e)
+      const items = await navigator.clipboard.read()
+      if (items.length === 0) {
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'No items on clipboard.',
+        })
+        return
+      }
+
+      // Get the first item from the clipboard
+      const clipboardItem = items[0]
+
+      // Get all the types for this clipboard item
+      const types = clipboardItem.types
+
+      if (types.length === 0) {
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'No valid types found for clipboard item.',
+        })
+        return
+      }
+
+      // Get the blob for the first type
+      const blob = await clipboardItem.getType(types[0])
+
+      // Convert the blob to a file
+      const file = new File([blob], 'ClipboardFile', { type: types[0] })
+
+      // Start the upload
+      handleStartUpload([file])
+    } catch (err) {
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: "Couldn't read from clipboard.",
+      })
     }
   }
 
@@ -116,6 +164,12 @@ export default function Home() {
           Paste from Clipboard
         </Button>
       </div>
+      <LinkDialog
+        open={linkDialogOpen}
+        onOpenChange={setLinkDialogOpen}
+        url={`${window.location.origin}/download/${fileId}`}
+        onContinue={handleCancelUpload}
+      />
     </div>
   )
 }

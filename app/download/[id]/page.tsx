@@ -38,7 +38,7 @@ export default async function Page({ params }: Params) {
       </div>
       <div className="flex items-center justify-center flex-col gap-1">
         <Suspense fallback={<div>Loading...</div>}>
-          <DownloadButton fileId={file.id} />
+          <DownloadButton fileId={file.id} fileName={file.name} />
         </Suspense>
         <Countdown createdAt={file.createdAt} />
       </div>
