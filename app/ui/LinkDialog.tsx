@@ -42,27 +42,27 @@ export default function LinkDialog({
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="bg-black border-gray-900">
-        <AlertDialogHeader>
-          <AlertDialogTitle>File download link</AlertDialogTitle>
-          <div
-            className="bg-gray-900 p-2 rounded-md flex 
-            items-center justify-between"
-          >
-            <p
-              className="overflow-hidden text-ellipsis 
-              max-w-80 text-gray-200"
-            >
-              {url}
-            </p>
-            <Clipboard
-              className="cursor-pointer hover:text-gray-200"
-              onClick={handleCopyToClipboard}
-              size={24}
-            />
-          </div>
-        </AlertDialogHeader>
+        <AlertDialogTitle>File download link</AlertDialogTitle>
+        <div
+          className="bg-gray-900 p-2 rounded-md flex 
+            items-center justify-between gap-1 w-[70%] max-w-96"
+        >
+          <p className="overflow-hidden text-ellipsis text-gray-200">{url}</p>
+          <Clipboard
+            className="cursor-pointer hover:text-gray-300 flex-shrink-0"
+            onClick={handleCopyToClipboard}
+            size={24}
+          />
+        </div>
         <AlertDialogFooter>
-          <AlertDialogAction onClick={onContinue}>Continue</AlertDialogAction>
+          <AlertDialogAction
+            onClick={() => {
+              handleCopyToClipboard()
+              onContinue()
+            }}
+          >
+            Continue
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

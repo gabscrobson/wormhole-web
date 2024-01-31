@@ -4,6 +4,7 @@ import { formatBytes } from '../../lib/utils'
 import Countdown from '../../ui/download/Countdown'
 import DownloadButton from '../../ui/download/DownloadButton'
 import { Suspense } from 'react'
+import { Separator } from '@/app/ui/Separator'
 
 interface Params {
   params: {
@@ -36,6 +37,7 @@ export default async function Page({ params }: Params) {
           Size: <strong>{formatBytes(file.size)}</strong>
         </p>
       </div>
+      <Separator className="bg-gray-800 sm:hidden" />
       <div className="flex items-center justify-center flex-col gap-1">
         <Suspense fallback={<div>Loading...</div>}>
           <DownloadButton fileId={file.id} fileName={file.name} />
