@@ -9,14 +9,12 @@ import { Button } from './ui/Button'
 import Dropzone from './ui/Dropzone'
 import { Files } from '@phosphor-icons/react'
 import { useToast } from './ui/Toast/use-toast'
-import LinkDialog from './ui/LinkDialog'
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [fileId, setFileId] = useState<string | null>(null)
-  const [linkDialogOpen, setLinkDialogOpen] = useState(false)
 
   const cancelFileUpload = useRef<Canceler | null>(null)
 
@@ -25,6 +23,7 @@ export default function Home() {
   const { isDragActive, open, getInputProps, getRootProps } = useDropzone({
     onDrop: handleStartUpload,
     noClick: isUploading,
+    noDrag: isUploading,
   })
 
   async function handleStartUpload(files: File[]) {
@@ -47,8 +46,6 @@ export default function Home() {
       return
     }
 
-    setFileId(data.fileId)
-
     await axios.put(data.signedUrl, files[0], {
       headers: {
         'Content-Type': files[0].type,
@@ -67,7 +64,7 @@ export default function Home() {
       }),
     })
 
-    setLinkDialogOpen(true)
+    setFileId(data.fileId)
   }
 
   function handleCancelUpload() {
@@ -143,6 +140,7 @@ export default function Home() {
         getRootProps={getRootProps}
         handleCancelUpload={handleCancelUpload}
         progress={progress}
+        fileId={fileId}
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Button
@@ -164,12 +162,6 @@ export default function Home() {
           Paste from Clipboard
         </Button>
       </div>
-      <LinkDialog
-        open={linkDialogOpen}
-        onOpenChange={setLinkDialogOpen}
-        fileId={fileId}
-        onContinue={handleCancelUpload}
-      />
     </div>
   )
 }

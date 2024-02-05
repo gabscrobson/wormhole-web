@@ -4,6 +4,8 @@ import { ArchiveBox, UploadSimple } from '@phosphor-icons/react'
 import { Button } from './Button'
 import { DropzoneInputProps, DropzoneRootProps } from 'react-dropzone'
 import ProgressBar from './ProgressBar'
+import { useEffect, useState } from 'react'
+import CopyLink from './CopyLink'
 
 interface DropzoneProps {
   file: File | null
@@ -13,7 +15,10 @@ interface DropzoneProps {
   getRootProps: <T extends DropzoneRootProps>(props?: T | undefined) => T
   handleCancelUpload: () => void
   progress: number
+  fileId: string | null
 }
+
+type Status = 'pending' | 'ready' | 'uploading' | 'dragging'
 
 export default function Dropzone({
   file,
@@ -22,8 +27,21 @@ export default function Dropzone({
   getRootProps,
   handleCancelUpload,
   progress,
+  fileId,
 }: DropzoneProps) {
-  const status = file ? 'accept' : isDragActive ? 'active' : 'pending'
+  const [url, setUrl] = useState<string>('')
+
+  // Set the URL of the current page on mount
+  useEffect(() => {
+    setUrl(window.location.origin)
+  }, [])
+
+  // Set the status of the dropzone and its CSS
+  let status: Status = 'pending'
+
+  if (fileId) status = 'ready'
+  else if (file) status = 'uploading'
+  else if (isDragActive) status = 'dragging'
 
   const dropzoneCSS =
     status === 'pending'
@@ -38,28 +56,34 @@ export default function Dropzone({
         {...getRootProps()}
         data-status={status}
         className={
-          'p-2 border border-dashed rounded-md h-36 transition-all flex items-center justify-center group select-none' +
+          'p-2 border border-dashed rounded-md h-36 transition-all group select-none' +
           ' ' +
           dropzoneCSS
         }
       >
         <input {...getInputProps()} />
 
-        <div className={'transition-all text-center' + ' ' + dropzoneTextCSS}>
+        <div
+          className={
+            'transition-all text-center h-full' + ' ' + dropzoneTextCSS
+          }
+        >
           {status === 'pending' && (
-            <div className="flex items-center gap-1 flex-col">
+            <div className="flex items-center justify-center gap-1 flex-col h-full">
               <UploadSimple size={35} />
               <p>Choose a file or drag it here</p>
             </div>
           )}
-          {status === 'active' && (
-            <div className="flex items-center gap-1 flex-col">
-              <ArchiveBox size={35} />
-              <p>Drop your files here</p>
+
+          {status === 'ready' && (
+            <div className="flex items-center justify-center gap-3 flex-col h-full">
+              <CopyLink link={`${url}/download/${fileId}`} />
+              <Button onClick={handleCancelUpload}>Continue</Button>
             </div>
           )}
-          {status === 'accept' && (
-            <div className="flex items-center gap-2 flex-col">
+
+          {status === 'uploading' && (
+            <div className="flex items-center justify-center gap-2 flex-col h-full w-8/12 m-auto">
               <p>
                 Uploading <strong>{file?.name}</strong>
               </p>
@@ -71,6 +95,13 @@ export default function Dropzone({
               >
                 Cancel
               </Button>
+            </div>
+          )}
+
+          {status === 'dragging' && (
+            <div className="flex items-center justify-center gap-1 flex-col h-full">
+              <ArchiveBox size={35} />
+              <p>Drop your files here</p>
             </div>
           )}
         </div>
