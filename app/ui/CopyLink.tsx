@@ -20,7 +20,7 @@ export default function CopyLink({ link }: CopyLinkProps) {
   return (
     <div
       className="bg-gray-900 hover:bg-gray-950 text-gray-200 hover:text-gray-400 p-2 rounded-md flex 
-      items-center justify-between gap-1 cursor-pointer select-none transition-all w-10/12"
+      items-center justify-between gap-1 cursor-pointer select-none transition-all w-10/12 whitespace-nowrap"
       onClick={handleCopyToClipboard}
     >
       <p className="overflow-hidden text-ellipsis">{link}</p>
