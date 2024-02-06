@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 const links = [
   {
     title: 'Github',
-    href: 'https://github.com/gabscrobson',
+    href: 'https://github.com/gabscrobson/wormhole-web',
   },
   {
     title: 'Widget',

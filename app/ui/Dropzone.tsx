@@ -50,6 +50,14 @@ export default function Dropzone({
   const dropzoneTextCSS =
     status === 'pending' ? 'text-gray-400 group-hover:text-white' : 'text-white'
 
+  function truncateFilename(filename: string | undefined, maxLength = 35) {
+    if (!filename) return ''
+    if (filename.length <= maxLength) {
+      return filename
+    }
+    return `${filename.substring(0, maxLength)}...`
+  }
+
   return (
     <div className="space-y-1">
       <div
@@ -85,7 +93,7 @@ export default function Dropzone({
           {status === 'uploading' && (
             <div className="flex items-center justify-center gap-2 flex-col h-full w-8/12 m-auto">
               <p>
-                Uploading <strong>{file?.name}</strong>
+                Uploading <strong>{truncateFilename(file?.name)}</strong>
               </p>
               <ProgressBar progress={progress} />
               <Button
